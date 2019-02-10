@@ -108,10 +108,10 @@ gulp.task('scripts', async () => {
 		plugins: [
 			rollupResolve(),
 			commonjs(),
-			terser({
-				sourcemap: true,
-				numWorkers: 1
-			})
+			// terser({
+			// 	sourcemap: true,
+			// 	numWorkers: 1
+			// })
 		]
 	});
 

@@ -1,0 +1,13 @@
+{
+	"awairClientID": "__SAMPLE_KEY__",
+	"awairClientSecret": "__SAMPLE_KEY__",
+	"cookieSecret": "__SAMPLE_KEY__",
+	"hostname": "localhost:3000",
+	"domain": "http://localhost:3000",
+	"environment": "development",
+	"productName": "Awair Dashboard",
+	"port": 3000,
+	"awairOauthStep1APIBasePath": "https://oauth-login.awair.is",
+	"awairOauthStep2APIBasePath": "https://oauth2.awair.is/v2/token",
+	"awairGraphQLBasePath": "https://developer-apis.awair.is/graphql"
+}
