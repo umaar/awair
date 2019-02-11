@@ -1,0 +1,11 @@
+<section>
+	<p>{{text}}</p>
+
+	{% if user %}
+		<ul class="user-data">
+			<li>id: {{user.id}}</li>
+			<li>{{user.email}}</li>
+			<li>{{user.name.firstName}} {{user.name.lastName}}</li>
+		</ul>
+	{% endif %}
+</section>

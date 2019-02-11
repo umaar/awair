@@ -1,0 +1,20 @@
+<nav class="nav" role="navigation">
+	<div class="nav__container">
+		<h1><a href="/">{{config.productName}}</a></h1>
+
+		<ul class="nav__menu">
+			{% if user %}
+				<li>
+					<a href="/account">Account</a>
+				</li>
+				<li>
+					<a href="/auth/logout">Logout</a>
+				</li>
+			{% else %}
+				<li>
+					<a href="/auth/login">Login</a>
+				</li>
+			{% endif %}
+		</ul>
+	</div>
+</nav>
