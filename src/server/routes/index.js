@@ -1,0 +1,182 @@
+const express = require('express');
+const config = require('config');
+const got = require('got');
+
+const router = express.Router();
+
+const awairClientID = config.get('awairClientID');
+const awairClientSecret = config.get('awairClientSecret');
+
+router.get('/', async (req, res) => {
+	const renderObject = {
+		messages: req.flash('messages'),
+		text: 'hello world'
+	};
+
+	res.render('index', renderObject);
+});
+
+router.get('/auth/logout', (req, res) => {
+	req.flash('messages', {
+		status: 'success',
+		value: 'You have been logged out'
+	});
+
+	delete req.session.awair;
+
+	return res.redirect('/');
+});
+
+router.get('/auth/login', (req, res) => {
+	const awairOauthStep1APIBasePath = config.get('awairOauthStep1APIBasePath');
+	const domain = config.get('domain');
+
+	const queryString = {
+		redirect_uri: `${domain}/auth/oauth2Success`,
+		client_id: awairClientID,
+		response_type: 'code',
+		scope: '',
+		state: 'test-state-123'
+	};
+
+	const params = new URLSearchParams(queryString);
+	const url = `${awairOauthStep1APIBasePath}/?${params.toString()}`;
+	res.redirect(url);
+});
+
+async function getToken(code) {
+	const awairOauthStep2APIBasePath = config.get('awairOauthStep2APIBasePath');
+
+	const tokenPayload = {
+		client_id: awairClientID,
+		client_secret: awairClientSecret,
+		grant_type: 'authorization_code',
+		code
+	};
+
+	const response = await got(awairOauthStep2APIBasePath, {
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(tokenPayload),
+		responseType: 'json'
+	});
+
+	if (response && response.body) {
+		const data = JSON.parse(response.body);
+		const accessToken = data.access_token;
+		console.log('Token retrieved');
+		return accessToken;
+	}
+
+	console.log('Nooooo. Cannot get the token', response.body);
+}
+
+async function queryGraphQL({query: rawQuery, token}) {
+	const awairGraphQLBasePath = config.get('awairGraphQLBasePath');
+	const queryPayload = `query { ${rawQuery} }`;
+
+	console.time('Awair API Response Time');
+	const response = await got(awairGraphQLBasePath, {
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+			accept: 'application/json'
+		},
+		body: JSON.stringify({query: queryPayload}),
+		responseType: 'json'
+	});
+	console.timeEnd('Awair API Response Time');
+
+	if (response && response.body) {
+		const parsedBody = JSON.parse(response.body);
+
+		return parsedBody.data;
+	}
+
+	console.log('\n\nError executing the GraphQL query', response.body);
+}
+
+async function getUserData(token) {
+	const queryPayload = `
+		User {
+			id,
+			email,
+			name {
+				firstName
+				lastName
+			}
+		}
+	`;
+
+	const response = await queryGraphQL({
+		query: queryPayload,
+		token
+	});
+
+	return response.User;
+}
+
+async function getDeviceList(token) {
+	const queryPayload = `
+		Devices {
+		  devices {
+		    uuid,
+		    deviceType,
+		    name
+		  }
+		}
+	`;
+
+	const response = await queryGraphQL({
+		query: queryPayload,
+		token
+	});
+
+	return response.Devices;
+}
+
+router.get('/auth/oauth2Success', async (req, res) => {
+	const code = req.query.code;
+
+	if (!code) {
+		req.flash('messages', {
+			status: 'danger',
+			value: 'Oauth was unsuccessful'
+		});
+
+		return res.redirect('/');
+	}
+
+	const accessToken = await getToken(code);
+	const data = await getUserData(accessToken);
+
+	req.flash('messages', {
+		status: 'success',
+		value: 'Connected to awair successfully'
+	});
+
+	req.session.awair = {
+		accessToken,
+		...data
+	};
+
+	res.redirect('/');
+});
+
+function isLoggedIn(req, res, next) {
+	if (req.session.awair && req.session.awair.accessToken) {
+		return next();
+	}
+
+	const errorString = 'Error: Tried to call a protected route from a logged out user';
+	res.status(401).send({error: errorString});
+}
+
+router.get('/api/device-list', isLoggedIn, async (req, res) => {
+	const deviceList = await getDeviceList(req.session.awair.accessToken);
+
+	res.json(deviceList);
+});
+
+module.exports = router;
