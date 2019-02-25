@@ -1,6 +1,3 @@
-
-
-
 ## Awair API
 
 https://developer.getawair.com/console/whats-new

@@ -16,6 +16,17 @@ router.get('/', async (req, res) => {
 	res.render('index', renderObject);
 });
 
+router.get('/device/:deviceID', async (req, res) => {
+	const deviceID = req.params.deviceID;
+	console.log({deviceID});
+	const renderObject = {
+		messages: req.flash('messages'),
+		text: 'hello world'
+	};
+
+	res.render('index', renderObject);
+});
+
 router.get('/auth/logout', (req, res) => {
 	req.flash('messages', {
 		status: 'success',
@@ -123,15 +134,22 @@ async function getDeviceList(token) {
 		  devices {
 		    uuid,
 		    deviceType,
-		    name
+		    name,
+		    deviceId
 		  }
 		}
 	`;
 
-	const response = await queryGraphQL({
-		query: queryPayload,
-		token
-	});
+	let response;
+
+	try {
+		response = await queryGraphQL({
+			query: queryPayload,
+			token
+		});
+	} catch (err) {
+		console.log('\nThere was an error: ', err);
+	}
 
 	return response.Devices;
 }
@@ -150,6 +168,7 @@ router.get('/auth/oauth2Success', async (req, res) => {
 
 	const accessToken = await getToken(code);
 	const data = await getUserData(accessToken);
+	const {devices} = await getDeviceList(accessToken);
 
 	req.flash('messages', {
 		status: 'success',
@@ -158,10 +177,35 @@ router.get('/auth/oauth2Success', async (req, res) => {
 
 	req.session.awair = {
 		accessToken,
-		...data
+		...data,
+		devices,
+		lastUpdated: new Date()
 	};
 
 	res.redirect('/');
+});
+
+router.get('/account/refresh', async (req, res) => {
+	console.log('Refreshing account details');
+
+	const accessToken = req.session.awair.accessToken;
+
+	const data = await getUserData(accessToken);
+	const {devices} = await getDeviceList(accessToken);
+
+	req.session.awair = {
+		accessToken,
+		...data,
+		devices,
+		lastUpdated: new Date()
+	};
+
+	req.flash('messages', {
+		status: 'success',
+		value: 'Details updated successfully'
+	});
+
+	return res.redirect('/');
 });
 
 function isLoggedIn(req, res, next) {
@@ -172,11 +216,5 @@ function isLoggedIn(req, res, next) {
 	const errorString = 'Error: Tried to call a protected route from a logged out user';
 	res.status(401).send({error: errorString});
 }
-
-router.get('/api/device-list', isLoggedIn, async (req, res) => {
-	const deviceList = await getDeviceList(req.session.awair.accessToken);
-
-	res.json(deviceList);
-});
 
 module.exports = router;

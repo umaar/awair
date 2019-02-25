@@ -16,6 +16,8 @@
 	const passport = require('passport');
 	const config = require('config');
 
+	const {formatDistance, parseISO} = require('date-fns');
+
 	const viewFolders = [
 		path.join(__dirname, '..', 'views')
 	];
@@ -26,7 +28,15 @@
 
 		const nunjucksEnv = nunjucks.configure(viewFolders, {
 			express: app,
-			autoescape: true
+			autoescape: true,
+			noCache: true
+		});
+
+		nunjucksEnv.addFilter('formatDistance', function(str) {
+			return formatDistance(parseISO(str), new Date(), {
+				includeSeconds: true,
+				addSuffix: true
+			});
 		});
 
 		app.locals.config = {

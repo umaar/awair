@@ -18,6 +18,16 @@
 
     {% include "./partials/analytics.html" %}
 
+    <script>
+      window.awairDashboardConfig = {};
+    </script>
+
+    {% if user %}
+      <script>
+        window.awairDashboardConfig.user = true;
+      </script>
+    {% endif %}
+
   </head>
   <body>
     {% include "./partials/nav.html" %}

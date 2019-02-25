@@ -2,16 +2,12 @@ async function getDeviceList() {
 	return (await fetch('/api/device-list')).json();
 }
 
-async function init() {
+async function init(config) {
 	console.log('Home!');
 
-	const {devices} = await getDeviceList();
-
-	const deviceString = devices.map(({name, uuid}) => `${name} (${uuid})`).join(' + ');
-
-	const li = document.createElement('li');
-	li.innerText = `Device: ${deviceString}`;
-	document.querySelector('.user-data').append(li);
+	if (!config.user) {
+		return;
+	}
 }
 
 export default {init};
