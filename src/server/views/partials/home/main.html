@@ -2,10 +2,22 @@
 	<p>{{text}}</p>
 
 	{% if user %}
+		<p>
+			Account Details last updated <strong>{{user.lastUpdated | formatDistance}}</strong> <em>(<a href="/account/refresh">refresh</a>)</em>
+		</p>
+
 		<ul class="user-data">
 			<li>id: {{user.id}}</li>
 			<li>{{user.email}}</li>
 			<li>{{user.name.firstName}} {{user.name.lastName}}</li>
+
+			{% for device in user.devices %}
+				<li>
+					<span>{{device.name  | capitalize}}</span>
+					(<a href="/device/{{device.uuid}}">{{device.uuid}}</a>)
+				</li>
+			{% endfor %}
+
 		</ul>
 	{% endif %}
 </section>
