@@ -18,13 +18,42 @@ router.get('/', async (req, res) => {
 
 router.get('/device/:deviceID', async (req, res) => {
 	const deviceID = req.params.deviceID;
-	console.log({deviceID});
+	const accessToken = req.session.awair.accessToken;
+
+	function getCurrentDeviceFromID(id) {
+		const selectedDevice = req.session.awair.devices.find(({uuid}) => {
+			return uuid === id;
+		});
+
+		return selectedDevice;
+	}
+
+	const selectedDevice = getCurrentDeviceFromID(deviceID);
+
 	const renderObject = {
 		messages: req.flash('messages'),
-		text: 'hello world'
+		latestScoreURL: `${req.originalUrl}/latest-score`,
+		selectedDevice
 	};
 
 	res.render('index', renderObject);
+});
+
+router.get('/device/:deviceID/latest-score', async (req, res) => {
+	const deviceID = req.params.deviceID;
+	const accessToken = req.session.awair.accessToken;
+
+	const response = await getLatestScore({accessToken, deviceID});
+
+	const renderObject = {
+		scores: response.airDataSeq[0]
+	};
+
+	// This should be an ajax request!!
+	// {"airDataSeq":[{"score":94,"sensors":[{"component":"TEMP","value":23.510000228881836},{"component":"HUMID","value":42.59000015258789},{"component":"CO2","value":796},{"component":"VOC","value":196},{"component":"PM25","value":8}],"timestamp":"2019-02-28T23:27:19.102Z"}]}
+
+	// res.json({x: 123});
+	res.render('partials/latest-score', renderObject);
 });
 
 router.get('/auth/logout', (req, res) => {
@@ -126,6 +155,34 @@ async function getUserData(token) {
 	});
 
 	return response.User;
+}
+
+async function getLatestScore({accessToken: token, deviceID}) {
+	const queryPayload = `
+		AirDataLatest(deviceUUID: "${deviceID}") {
+		  airDataSeq {
+		    score,
+		    sensors {
+		      component,
+		      value
+		    },
+		    timestamp
+		  }
+		}
+	`;
+
+	let response;
+
+	try {
+		response = await queryGraphQL({
+			query: queryPayload,
+			token
+		});
+	} catch (err) {
+		console.log('\nThere was an error: ', err);
+	}
+
+	return response.AirDataLatest;
 }
 
 async function getDeviceList(token) {
