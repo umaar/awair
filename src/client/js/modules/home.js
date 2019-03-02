@@ -2,10 +2,10 @@ async function getDeviceList() {
 	return (await fetch('/api/device-list')).json();
 }
 
-async function init(config) {
+async function init({user}) {
 	console.log('Home!');
 
-	if (!config.user) {
+	if (!user) {
 		return;
 	}
 }

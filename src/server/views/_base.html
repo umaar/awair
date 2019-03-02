@@ -22,11 +22,15 @@
       window.awairDashboardConfig = {};
     </script>
 
-    {% if user %}
       <script>
+      {% if user %}
         window.awairDashboardConfig.user = true;
+      {% endif %}
+
+      {% if latestScoreURL %}
+        window.awairDashboardConfig.latestScoreURL = '{{latestScoreURL}}';
+      {% endif %}
       </script>
-    {% endif %}
 
   </head>
   <body>

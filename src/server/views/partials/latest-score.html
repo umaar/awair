@@ -1,0 +1,13 @@
+<section>
+
+	<p>
+		Overall score: {{ scores.score }}
+	</p>
+
+
+	<ul>
+		{% for sensor in scores.sensors %}
+		  <li>{{sensor.component | capitalize}} - {{sensor.value | int}}</li>
+		{% endfor %}
+	</ul>
+</section>
