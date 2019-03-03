@@ -1,6 +1,4 @@
 <section>
-	<p>{{text}}</p>
-
 	{% if user %}
 		<p>
 			Account Details last updated <strong>{{user.lastUpdated | formatDistance}}</strong> <em>(<a href="/account/refresh">refresh</a>)</em>
@@ -17,7 +15,11 @@
 					(<a href="/device/{{device.uuid}}">{{device.uuid}}</a>)
 				</li>
 			{% endfor %}
-
 		</ul>
+
+		{% if selectedDevice %}
+			<h4>{{selectedDevice.name | capitalize}}</h4>
+		{% endif %}
+
 	{% endif %}
 </section>

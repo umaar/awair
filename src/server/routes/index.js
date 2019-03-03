@@ -9,8 +9,7 @@ const awairClientSecret = config.get('awairClientSecret');
 
 router.get('/', async (req, res) => {
 	const renderObject = {
-		messages: req.flash('messages'),
-		text: 'hello world'
+		messages: req.flash('messages')
 	};
 
 	res.render('index', renderObject);
@@ -29,6 +28,15 @@ router.get('/device/:deviceID', async (req, res) => {
 	}
 
 	const selectedDevice = getCurrentDeviceFromID(deviceID);
+
+	if (!selectedDevice) {
+		req.flash('messages', {
+			status: 'danger',
+			value: `That device (${deviceID}) is invalid`
+		});
+
+		return res.redirect('/');
+	}
 
 	const renderObject = {
 		messages: req.flash('messages'),
@@ -49,10 +57,6 @@ router.get('/device/:deviceID/latest-score', async (req, res) => {
 		scores: response.airDataSeq[0]
 	};
 
-	// This should be an ajax request!!
-	// {"airDataSeq":[{"score":94,"sensors":[{"component":"TEMP","value":23.510000228881836},{"component":"HUMID","value":42.59000015258789},{"component":"CO2","value":796},{"component":"VOC","value":196},{"component":"PM25","value":8}],"timestamp":"2019-02-28T23:27:19.102Z"}]}
-
-	// res.json({x: 123});
 	res.render('partials/latest-score', renderObject);
 });
 
@@ -223,7 +227,22 @@ router.get('/auth/oauth2Success', async (req, res) => {
 		return res.redirect('/');
 	}
 
-	const accessToken = await getToken(code);
+	let accessToken;
+
+	try {
+		console.log('Getting access token');
+		accessToken = await getToken(code);
+	} catch (err) {
+		const errorMessage = 'Could not get access token';
+		console.log(errorMessage, err);
+		req.flash('messages', {
+			status: 'danger',
+			value: errorMessage
+		});
+
+		return res.redirect('/');
+	}
+
 	const data = await getUserData(accessToken);
 	const {devices} = await getDeviceList(accessToken);
 
