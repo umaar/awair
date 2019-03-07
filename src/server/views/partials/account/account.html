@@ -1,0 +1,27 @@
+<section>
+	<p>
+		Account Details last updated <strong>{{user.lastUpdated | formatDistance}}</strong> <em>(<a href="/account/refresh">refresh</a>)</em>
+	</p>
+
+	<p>Your details:</p>
+
+	<ul class="user-data">
+		<li>User ID: {{user.id}}</li>
+		<li>Email: {{user.email}}</li>
+		<li>Name: {{user.name.firstName}} {{user.name.lastName}}</li>
+	</ul>
+
+	<p>Your devices:</p>
+
+	<ul>
+		{% for device in user.devices %}
+			<li>
+				<span>{{device.name  | capitalize}}</span>
+				<ul>
+					<li>UUID: {{device.uuid}}</li>
+					<li>Device ID: {{device.deviceId}}</li>
+				</ul>
+			</li>
+		{% endfor %}
+	</ul>
+</section>

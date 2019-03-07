@@ -15,6 +15,14 @@ router.get('/', async (req, res) => {
 	res.render('index', renderObject);
 });
 
+router.get('/account', isLoggedIn, async (req, res) => {
+	const renderObject = {
+		messages: req.flash('messages')
+	};
+
+	res.render('account', renderObject);
+});
+
 router.get('/device/:deviceID', async (req, res) => {
 	const deviceID = req.params.deviceID;
 	const accessToken = req.session.awair.accessToken;

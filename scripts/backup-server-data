@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo 'Backing up the Awair Dashboard'
+
+scp user@host:"/home/web/awair.json /home/web/apps/awair/db-production-awair.sqlite" ~/development/awair/backup
