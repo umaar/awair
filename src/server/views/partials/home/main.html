@@ -1,21 +1,17 @@
 <section>
 	{% if user %}
-		<p>
-			Account Details last updated <strong>{{user.lastUpdated | formatDistance}}</strong> <em>(<a href="/account/refresh">refresh</a>)</em>
-		</p>
 
-		<ul class="user-data">
-			<li>id: {{user.id}}</li>
-			<li>{{user.email}}</li>
-			<li>{{user.name.firstName}} {{user.name.lastName}}</li>
+		{% if not selectedDevice %}
+			<p>Select a device:</p>
+		{% endif %}
 
+		<section class="buttons-container">
 			{% for device in user.devices %}
-				<li>
+				<a class="pure-material-button-contained" href="/device/{{device.uuid}}">
 					<span>{{device.name  | capitalize}}</span>
-					(<a href="/device/{{device.uuid}}">{{device.uuid}}</a>)
-				</li>
+				</a>
 			{% endfor %}
-		</ul>
+		</section>
 
 		{% if selectedDevice %}
 			<h4>{{selectedDevice.name | capitalize}}</h4>
