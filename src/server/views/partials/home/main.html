@@ -7,8 +7,8 @@
 
 		<section class="buttons-container">
 			{% for device in user.devices %}
-				<a class="pure-material-button-contained" href="/device/{{device.uuid}}">
-					<span>{{device.name  | capitalize}}</span>
+				<a class="pure-material-button-contained" href="/device/{{device.uuid}}" {% if device.uuid === selectedDevice.uuid %} disabled {% endif %}>
+					<span>{{device.name  | capitalize}} {% if device.uuid === selectedDevice.uuid %} ✅️ {% endif %}</span>
 				</a>
 			{% endfor %}
 		</section>

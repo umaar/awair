@@ -23,6 +23,10 @@
     outline: none;
     cursor: pointer;
     transition: box-shadow 0.2s;
+
+    &[disabled] {
+        cursor: default;
+    }
 }
 
 .pure-material-button-contained::-moz-focus-inner {
