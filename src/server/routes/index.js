@@ -106,7 +106,7 @@ async function getToken(code) {
 		code
 	};
 
-	const response = await got(awairOauthStep2APIBasePath, {
+	const response = await got.post(awairOauthStep2APIBasePath, {
 		headers: {
 			'Content-Type': 'application/json'
 		},
