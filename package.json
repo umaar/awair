@@ -24,7 +24,7 @@
     "express-rev": "^0.1.2",
     "express-session": "^1.17.0",
     "forcedomain": "^2.0.0",
-    "got": "^10.7.0",
+    "got": "^11.8.5",
     "knex": "^0.20.13",
     "nunjucks": "^3.2.1",
     "passport": "^0.4.1",
